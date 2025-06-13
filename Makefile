@@ -20,9 +20,22 @@ setup:
 	@sleep 5
 	@echo "Setup complete!"
 
-run:
+up:
 	@echo "Running the application..."
-	@./bin/start.sh
+	@docker-compose up --build
+	// @./bin/start.sh
+
+down:
+	@echo "Shutting down the application..."
+	@docker-compose down
+
+start:
+	@echo "Resuming the application..."
+	@docker-compose start
+
+stop:
+	@echo "Halting the application..."
+	@docker-compose stop
 
 test:
 	@echo "Running tests..."

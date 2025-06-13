@@ -19,5 +19,20 @@ services:
       timeout: 5s
       retries: 5
 
+  flask:
+    build: .
+    container_name: messaging-service-api
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      ENV: development
+    volumes:
+      - .:/app
+    command: ["bash", "bin/start.sh"]
+
 volumes:
   postgres_data: 
