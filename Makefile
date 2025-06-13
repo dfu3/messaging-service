@@ -12,22 +12,23 @@ help:
 	@echo "  db-shell - Connect to the database shell"
 	@echo "  help     - Show this help message"
 
-setup:
-	@echo "Setting up the project..."
-	@echo "Starting PostgreSQL database..."
-	@docker-compose up -d
-	@echo "Waiting for database to be ready..."
-	@sleep 5
-	@echo "Setup complete!"
+# setup:
+# 	@echo "Setting up the project..."
+# 	@echo "Starting PostgreSQL database..."
+# 	@docker-compose up -d
+# 	@echo "Waiting for database to be ready..."
+# 	@sleep 5
+# 	@echo "Setup complete!"
 
 up:
 	@echo "Running the application..."
+	@docker-compose up -d
 	@docker-compose up --build
 	// @./bin/start.sh
 
 down:
 	@echo "Shutting down the application..."
-	@docker-compose down
+	@docker-compose down -v
 
 start:
 	@echo "Resuming the application..."

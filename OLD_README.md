@@ -113,14 +113,20 @@ This project structure is laid out for you already. You are welcome to move or c
 └── README.md              # This file
 ```
 
-## Development
+## Getting Started
 
 1. Clone the repository
-2. Run `make up` to build and start the app
-3. Run `make down` bring the app down and remove the containers
-4. Run `make stop` to halt the app
-5. Run `make start` resume a stopped app
-6. Run `python test_reqs.py` to hit the endpoints with examples
+2. Run `make setup` to initialize the project
+3. Run `docker-compose up -d` to start the PostgreSQL database, or modify it to choose a database of your choice
+4. Run `make run` to start the application
+5. Run `make test` to run tests
+
+## Development
+
+- Use `docker-compose up -d` to start the PostgreSQL database
+- Use `make run` to start the development server
+- Use `make test` to run tests
+- Use `docker-compose down` to stop the database
 
 ## Database
 

@@ -88,7 +88,7 @@ curl -X POST "$BASE_URL/api/webhooks/email" \
   -d '{
     "from": "contact@gmail.com",
     "to": "user@usehatchapp.com",
-    "xillio_id": "message-3",
+    "messaging_provider_id": "message-3",
     "body": "<html><body>This is an incoming email with <b>HTML</b> content</body></html>",
     "attachments": ["https://example.com/received-document.pdf"],
     "timestamp": "2024-11-01T14:00:00Z"

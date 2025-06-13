@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import os
+from .providers import SmsProvider, EmailProvider
 
 db = SQLAlchemy()
 
@@ -14,9 +15,6 @@ def create_app():
         f"{os.environ['DB_HOST']}:5432/{os.environ['DB_NAME']}"
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    print(app.config['SQLALCHEMY_DATABASE_URI'])
-
     db.init_app(app)
 
     print('CREATING TABLES')
@@ -28,6 +26,11 @@ def create_app():
         except SQLAlchemyError as e:
             print(f"Database creation error: {e}")
 
+        app.config['sms_provider'] = SmsProvider(endpoint="https://api.verizon.com/sms/send")
+        app.config['email_provider'] = EmailProvider(endpoint="https://api.gmail.com/mail/send")
+
         from . import routes
+        from app.routes import api
+        app.register_blueprint(api)
 
     return app
