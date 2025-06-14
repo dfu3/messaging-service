@@ -27,6 +27,7 @@ def main():
         "timestamp": "2024-11-01T14:00:00Z"
     })
     print_response(resp)
+    assert resp.status_code == 201
 
     # Test 2: Send MMS
     print("2. Testing MMS send...")
@@ -39,6 +40,7 @@ def main():
         "timestamp": "2024-11-01T14:00:00Z"
     })
     print_response(resp)
+    assert resp.status_code == 201
 
     # Test 3: Send Email
     print("3. Testing Email send...")
@@ -50,6 +52,7 @@ def main():
         "timestamp": "2024-11-01T14:00:00Z"
     })
     print_response(resp)
+    assert resp.status_code == 201
 
     # Test 4: Incoming SMS webhook
     print("4. Testing incoming SMS webhook...")
@@ -63,6 +66,7 @@ def main():
         "timestamp": "2024-11-01T14:00:00Z"
     })
     print_response(resp)
+    assert resp.status_code == 201
 
     # Test 5: Incoming MMS webhook
     print("5. Testing incoming MMS webhook...")
@@ -76,6 +80,7 @@ def main():
         "timestamp": "2024-11-01T14:00:00Z"
     })
     print_response(resp)
+    assert resp.status_code == 201
 
     # Test 6: Incoming Email webhook
     print("6. Testing incoming Email webhook...")
@@ -88,6 +93,7 @@ def main():
         "timestamp": "2024-11-01T14:00:00Z"
     })
     print_response(resp)
+    assert resp.status_code == 201
 
     # Test 7: Get conversations
     print("7. Testing get conversations...")
@@ -96,6 +102,7 @@ def main():
     try:
         convos = resp.json()
         convo_id = convos[0]["id"] if convos else None
+        assert resp.status_code == 200
     except Exception:
         convo_id = None
 
@@ -104,8 +111,34 @@ def main():
         print("8. Testing get messages for conversation...")
         resp = requests.get(f"{BASE_URL}/api/conversations/{convo_id}/messages", headers=HEADERS)
         print_response(resp)
+        assert resp.status_code == 200
     else:
         print("8. Skipped: No conversation found.\n")
+
+    # Test 9: Failed Validation Phone
+    print("9. Testing Failed Validation - Bad phone number...")
+    resp = requests.post(f"{BASE_URL}/api/messages/sms", headers=HEADERS, json={
+        "from": "6543",
+        "to": "+18045551234",
+        "type": "sms",
+        "body": "Hello! This is a test SMS message.",
+        "attachments": None,
+        "timestamp": "2024-11-01T14:00:00Z"
+    })
+    print_response(resp)
+    assert resp.status_code == 400
+
+    # Test 10: Failed Validation Email
+    print("10. Testing Failed Validation - Bad email...")
+    resp = requests.post(f"{BASE_URL}/api/messages/email", headers=HEADERS, json={
+        "from": "user@usehatchapp.com",
+        "to": "contact.gmail.com",
+        "body": "Hello! This is a test email message with <b>HTML</b> formatting.",
+        "attachments": ["https://example.com/document.pdf"],
+        "timestamp": "2024-11-01T14:00:00Z"
+    })
+    print_response(resp)
+    assert resp.status_code == 400
 
     print("=== Test script completed ===")
 

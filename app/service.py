@@ -1,5 +1,5 @@
 from flask import current_app
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -56,7 +56,7 @@ def save_message(
         body=body,
         attachments=attachments or [],
         timestamp=timestamp,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
         conversation_id=conversation.id,
         provider_message_id=provider_message_id
     )
@@ -111,7 +111,7 @@ def send_message(
     else:
         raise ValueError(f"Unsupported message type: {msg_type}")
 
-    # Step 3: Try sending via the provider
+    # Step 3: Try sending via the mocked provider
     try:
         external_id = provider.send_with_retry({
             "from": from_address,
@@ -127,8 +127,7 @@ def send_message(
             db.session.commit()
 
     except Exception as e:
-        # Logging can be added here
+        # outbound messages without a provider_message_id can be assumed to have failed
         print(f"Message sending failed: {e}")
-        # Optionally mark it as failed via status field (not implemented here)
 
     return saved_message

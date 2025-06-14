@@ -29,6 +29,12 @@ class Provider(ABC):
                         return None
                     print(f"Retry {retries}/{max_retries} due to rate limiting. Waiting {retry_delay} seconds...")
                     time.sleep(retry_delay)
+                elif 400:
+                    print(f"Bad Request, adjust implementation: {e}. Not retrying.")
+                    return None
+                elif 401:
+                    print(f"Unauthorized, check creds: {e}. Not retrying.")
+                    return None
                 elif 500 <= e.status_code < 600:
                     print(f"Server error: {e}. Not retrying.")
                     return None
@@ -46,9 +52,13 @@ class SmsProvider(Provider):
         print(f"[SMS] Sending message to endpoint: {self.endpoint}")
         chance = random.random()
 
-        if chance < 0.8:
+        if chance < 0.6:
             print("SMS sent successfully")
             return f"sms-{uuid.uuid4()}"
+        elif chance < 0.7:
+            raise ProviderError(400, "SMS Bad Request to client")
+        elif chance < 0.8:
+            raise ProviderError(401, "SMS Not Authorized with client")
         elif chance < 0.9:
             raise ProviderError(429, "SMS rate limited")
         else:

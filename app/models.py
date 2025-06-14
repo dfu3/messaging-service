@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Integer, ForeignKey, Text, DateTime, JSON
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from . import db
 
@@ -13,8 +13,8 @@ class Conversation(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     participant_1 = Column(Text, nullable=False)
     participant_2 = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     messages = relationship('Message', back_populates='conversation', cascade='all, delete-orphan')
 
@@ -32,7 +32,7 @@ class Message(db.Model):
     attachments = Column(JSONB, default=list)  # list of attachment URLs
     provider_message_id = Column(Text, nullable=True)
     timestamp = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     conversation = relationship('Conversation', back_populates='messages')
 

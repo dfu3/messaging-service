@@ -113,7 +113,7 @@ This project structure is laid out for you already. You are welcome to move or c
 └── README.md              # This file
 ```
 
-## Development
+## Development - UPDATED
 
 1. Clone the repository
 2. Run `make up` to build and start the app
