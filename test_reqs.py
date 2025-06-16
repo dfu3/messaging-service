@@ -1,6 +1,8 @@
 import requests
 import json
 
+# END-TO-END TEST ~ SERVER MUST BE RUNNING 
+
 BASE_URL = "http://localhost:5000"
 HEADERS = {"Content-Type": "application/json"}
 
@@ -139,6 +141,12 @@ def main():
     })
     print_response(resp)
     assert resp.status_code == 400
+
+    # print("=== Testing Provider Client Handling ===")
+    # test_provider_client_success()
+    # test_provider_client_retry()
+    # test_provider_client_bad_request()
+    # test_provider_client_server_error()
 
     print("=== Test script completed ===")
 

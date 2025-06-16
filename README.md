@@ -1,24 +1,40 @@
 # Backend Interview Project
 
-This is a scaffold for Hatch's backend interview project. It includes basic setup for development, testing, and deployment.
+Messaging API using Flask and Postgres
 
-## Guidelines
+## Running The App
 
-At Hatch, we work with several message providers to offer a unified way for our Customers to  communicate to their Contacts. Today we offer SMS, MMS, email, voice calls, and voicemail drops. Your task is to implement an HTTP service that supports the core messaging functionality of Hatch, on a much smaller scale. Specific instructions and guidelines on completing the project are below.
+0. Install Docker Desktop
+1. Add required creds/fields to `.env` file (copy structure from `.env.sample`)
+2. Run `make up` to build and start the app
+3. Run `make down` bring the app down and remove the containers
+4. Run `make stop`  or ctrl-C to halt the app
+5. Run `make start` resume a stopped app (must use `make up` if import/package changes)
+6. Run `python test_reqs.py` to hit the endpoints with examples (while api is up)
+7. Run `python test_client_handling.py` to run provider client unit tests
 
-### General Guidelines
+## Using the API
 
-- You may use whatever programming language, libraries, or frameworks you'd like. 
-- We strongly encourage you to use whatever you're most familiar with so that you can showcase your skills and know-how. Candidates will not receive any kind of 'bonus points' or 'red flags' regarding their specific choices of language.
-- You are welcome to use AI, Google, StackOverflow, etc as resources while you're developing. We just ask that you understand the code very well, because we will continue developing on it during your onsite interview.
+*Full Example Requests found in `test_reqs.py`
 
-### Project-specific guidelines
+Request the following to send mesasges via the cooresponding provider client API:
+- `POST /api/messages/sms`
+- `POST /api/messages/email`
+(Saves messages to DB, sends them via provider client, tries to update id)
 
-- Assume that a provider may return HTTP error codes like 500, 429 and plan accordingly
-- Conversations consist of messages from multiple providers. Feel free to consult providers such as Twilio or Sendgrid docs when designing your solution, but all external resources should be mocked out by your project. We do not expect you to actually integrate with a third party provider as part of this project.
-- It's OK to use Google or a coding assistant to produce your code. Just make sure you know it well, because the next step will be to code additional features in this codebase with us during your full interview.
 
-## Requirements
+Request the following to simulate webhooks listening to inbound messages:
+- `POST /api/messages/sms`
+- `POST /api/messages/email`
+(This simply records them in the DB)
+
+
+Request the following to Query the DB:
+- `GET /api/conversations`
+- `GET /api/conversations/<uuid:conversation_id>/messages`
+(Read Only)
+
+## Requirements (from original ReadMe)
 
 The service should implement:
 
@@ -27,113 +43,3 @@ The service should implement:
   - Handle incoming webhook messages from both providers
 - **Conversation Management**: Messages should be automatically grouped into conversations based on participants (from/to addresses)
 - **Data Persistence**: All conversations and messages must be stored in a relational database with proper relationships and indexing
-
-### Providers
-
-**SMS & MMS**
-
-**Example outbound payload to send an SMS or MMS**
-
-```json
-{
-    "from": "from-phone-number",
-    "to": "to-phone-number",
-    "type": "mms" | "sms",
-    "body": "text message",
-    "attachments": ["attachment-url"] | [] | null,
-    "timestamp": "2024-11-01T14:00:00Z" // UTC timestamp
-}
-```
-
-**Example inbound SMS**
-
-```json
-{
-    "from": "+18045551234",
-    "to": "+12016661234",
-    "type": "sms",
-    "messaging_provider_id": "message-1",
-    "body": "text message",
-    "attachments": null,
-    "timestamp": "2024-11-01T14:00:00Z" // UTC timestamp
-}
-```
-
-**Example inbound MMS**
-
-```json
-{
-    "from": "+18045551234",
-    "to": "+12016661234",
-    "type": "mms",
-    "messaging_provider_id": "message-2",
-    "body": "text message",
-    "attachments": ["attachment-url"] | [],
-    "timestamp": "2024-11-01T14:00:00Z" // UTC timestamp
-}
-```
-
-**Email Provider**
-
-**Example Inbound Email**
-
-```json
-{
-    "from": "[user@usehatchapp.com](mailto:user@usehatchapp.com)",
-    "to": "[contact@gmail.com](mailto:contact@gmail.com)",
-    "xillio_id": "message-2",
-    "body": "<html><body>html is <b>allowed</b> here </body></html>",  "attachments": ["attachment-url"] | [],
-    "timestamp": "2024-11-01T14:00:00Z" // UTC timestamp
-}
-```
-
-**Example Email Payload**
-
-```json
-{
-    "from": "[user@usehatchapp.com](mailto:user@usehatchapp.com)",
-    "to": "[contact@gmail.com](mailto:contact@gmail.com)",
-    "body": "text message with or without html",
-    "attachments": ["attachment-url"] | [],
-    "timestamp": "2024-11-01T14:00:00Z" // UTC timestamp
-}
-```
-
-### Project Structure
-
-This project structure is laid out for you already. You are welcome to move or change things, just update the Makefile, scripts, and/or docker resources accordingly. As part of the evaluation of your code, we will run 
-
-```
-.
-├── bin/                    # Scripts and executables
-│   ├── start.sh           # Application startup script
-│   └── test.sh            # API testing script with curl commands
-├── docker-compose.yml      # PostgreSQL database setup
-├── Makefile               # Build and development commands with docker-compose integration
-└── README.md              # This file
-```
-
-## Development - UPDATED
-
-1. Clone the repository
-2. Run `make up` to build and start the app
-3. Run `make down` bring the app down and remove the containers
-4. Run `make stop` to halt the app
-5. Run `make start` resume a stopped app
-6. Run `python test_reqs.py` to hit the endpoints with examples
-
-## Database
-
-The application uses PostgreSQL as its database. The docker-compose.yml file sets up:
-- PostgreSQL 15 with Alpine Linux
-- Database: `messaging_service`
-- User: `messaging_user`
-- Password: `messaging_password`
-- Port: `5432` (exposed to host)
-
-To connect to the database directly:
-```bash
-docker-compose exec postgres psql -U messaging_user -d messaging_service
-```
-
-Again, you are welcome to make changes here, as long as they're in the docker-compose.yml

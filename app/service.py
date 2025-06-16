@@ -6,6 +6,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import db
 from app.models import Message, Conversation
 
+# stuff for mocking cleint call
+import requests_mock
+import uuid
+import os
+
 
 def save_message(
     direction: str,
@@ -20,7 +25,7 @@ def save_message(
     """
     Finds or creates a conversation, then saves a message tied to it.
     """
-    # Step 1: Find or create a conversation
+    # Find or create a conversation
     try:
         conversation = Conversation.query.filter(
             or_(
@@ -41,13 +46,13 @@ def save_message(
                 participant_2=to_address
             )
             db.session.add(conversation)
-            db.session.flush()  # Ensures we get an ID before commit
+            db.session.flush()
 
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Failed to fetch or create conversation: {e}")
 
-    # Step 2: Create and save the message
+    # Create and save the message
     message = Message(
         direction=direction,
         from_address=from_address,
@@ -87,12 +92,11 @@ def send_message(
 ) -> Message:
     """
     Saves and sends a message via the appropriate provider.
-    Handles retry logic and 5XX failures via the provider class.
+    Handles retry logic and failures via the provider class.
     """
-    # Determine the direction and provider
     direction = "outbound"
 
-    # Step 1: Save the message without provider_message_id
+    # Save the message without provider_message_id
     saved_message = save_message(
         direction=direction,
         from_address=from_address,
@@ -103,7 +107,7 @@ def send_message(
         timestamp=timestamp
     )
 
-    # Step 2: Choose the appropriate provider
+    # Choose the appropriate provider
     if msg_type == "sms" or msg_type == "mms":
         provider = current_app.config['sms_provider']
     elif msg_type == "email":
@@ -111,20 +115,25 @@ def send_message(
     else:
         raise ValueError(f"Unsupported message type: {msg_type}")
 
-    # Step 3: Try sending via the mocked provider
+    # Try sending via the mocked provider
     try:
-        external_id = provider.send_with_retry({
-            "from": from_address,
-            "to": to_address,
-            "body": body,
-            "attachments": attachments,
-            "timestamp": timestamp
-        })
+        with requests_mock.Mocker() as m:
+            # simluate real http client call
+            m.post(os.environ['VERIZON_POST_ENDPOINT'], json={'id': f"sms-{uuid.uuid4()}"})
+            m.post(os.environ['GMAIL_POST_ENDPOINT'], json={'id': f"email-{uuid.uuid4()}"})
 
-        if external_id:
-            # Update message with external ID
-            saved_message.provider_message_id = external_id
-            db.session.commit()
+            external_id = provider.send_with_retry({
+                "from": from_address,
+                "to": to_address,
+                "body": body,
+                "attachments": attachments,
+                "timestamp": timestamp
+            })
+
+            if external_id:
+                # Update message with external ID
+                saved_message.provider_message_id = external_id
+                db.session.commit()
 
     except Exception as e:
         # outbound messages without a provider_message_id can be assumed to have failed

@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 import os
-from .providers import SmsProvider, EmailProvider
+from client_integrations.providers import SmsProvider, EmailProvider
 
 db = SQLAlchemy()
 
@@ -26,8 +26,8 @@ def create_app():
         except SQLAlchemyError as e:
             print(f"Database creation error: {e}")
 
-        app.config['sms_provider'] = SmsProvider(endpoint="https://api.verizon.com/sms/send")
-        app.config['email_provider'] = EmailProvider(endpoint="https://api.gmail.com/mail/send")
+        app.config['sms_provider'] = SmsProvider(endpoint=os.environ['VERIZON_POST_ENDPOINT'])
+        app.config['email_provider'] = EmailProvider(endpoint=os.environ['GMAIL_POST_ENDPOINT'])
 
         from . import routes
         from app.routes import api

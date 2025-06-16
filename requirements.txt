@@ -3,4 +3,5 @@ SQLAlchemy
 psycopg2-binary
 flask_sqlalchemy
 requests
+requests_mock
 phonenumbers
