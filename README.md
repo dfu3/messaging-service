@@ -20,19 +20,25 @@ Messaging API using Flask and Postgres
 Request the following to send mesasges via the cooresponding provider client API:
 - `POST /api/messages/sms`
 - `POST /api/messages/email`
+
 (Saves messages to DB, sends them via provider client, tries to update id)
+
 
 
 Request the following to simulate webhooks listening to inbound messages:
 - `POST /api/messages/sms`
 - `POST /api/messages/email`
+
 (This simply records them in the DB)
+
 
 
 Request the following to Query the DB:
 - `GET /api/conversations`
 - `GET /api/conversations/<uuid:conversation_id>/messages`
+
 (Read Only)
+
 
 ## Requirements (from original ReadMe)
 
